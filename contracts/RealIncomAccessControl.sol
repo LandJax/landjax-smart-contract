@@ -1,24 +1,43 @@
-// SPDX-License-Modifier: MIT
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.7;
 
-contract RealIncomAccessControl is Ownable{
+contract RealIncomAccessControl{
     mapping(address => bool) private admins;
     address private owner;
 
     constructor(){
         owner = msg.sender;
+        admins[msg.sender] = true;
     }
 
-    modifier onlyOwner {
-        require(msg.sender == owner, "You are not the owner")
+    event AdminCreated(address admin, bool isAdmin);
+
+    function isAuthorized(address sender) public view returns(bool){
+        return (sender == owner || admins[msg.sender]);
     }
 
-    function isAdmin (address sender) public returns(bool){
+    modifier onlyAuthorized {
+        require(msg.sender == owner || admins[msg.sender], "only Authorized Personnel are allowed");
+        _;
+    }
+
+
+
+    function isAdmin (address sender) public view returns(bool){
         return admins[sender];
     }
 
-    function makeAdmin (address sender) public onlyOwner{
+    function makeAdmin (address sender) public onlyAuthorized{
         admins[sender] = true;
+        emit AdminCreated(sender, admins[sender]);
     }
 }
+
+//  function updateNftContract(address _nftContract) public onlyAuthorised{
+//          realIncomNftContract = RealIncomNft(_nftContract);
+//     }
+
+//     function updateVillageSquare(address _villageSquareContract) public onlyAuthorised{
+//          accessController = VillageSquare(_villageSquareContract);
+//     }

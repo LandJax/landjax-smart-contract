@@ -1,23 +1,58 @@
-import { ethers } from "hardhat";
+import { ethers, run } from "hardhat";
+import process from 'process';
+
+
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const realIncomAccessControlFactory = await ethers.getContractFactory("RealIncomAccessControl");
+  const realIncomAccessControlContract = await realIncomAccessControlFactory.deploy();
+  await realIncomAccessControlContract.deployed();
+  await realIncomAccessControlContract.deployTransaction.wait(6)
+  await verify(realIncomAccessControlContract.address, [])
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const realIncomNftFactory = await ethers.getContractFactory("RealIncomNft");
+  const realIncomNftContract = await realIncomNftFactory.deploy(realIncomAccessControlContract.address);
+  await realIncomNftContract.deployed();
+  await realIncomNftContract.deployTransaction.wait(6)
+  await verify(realIncomNftContract.address, [])
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const realIncomAuctionFactory = await ethers.getContractFactory("RealIncomAuction");
+  const realIncomAuctionContract = await realIncomAuctionFactory.deploy(realIncomNftContract.address,realIncomAccessControlContract.address);
+  await realIncomAuctionContract.deployed();
+  await realIncomAuctionContract.deployTransaction.wait(6)
+  await verify(realIncomAuctionContract.address, [])
 
-  await lock.deployed();
-
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  const villageSquareFactory = await ethers.getContractFactory("VillageSquare");
+  const villageSquareContract = await villageSquareFactory.deploy(realIncomAuctionContract.address, realIncomAccessControlContract.address);
+  await villageSquareContract.deployed();
+  await villageSquareContract.deployTransaction.wait(6)
+  await verify(villageSquareContract.address, [])
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+const verify = async (contractAddress:string, args: any) => {
+  console.log("Verifying contract...")
+  try {
+    await run("verify:verify", {
+      address: contractAddress,
+      constructorArguments: args,
+    })
+  } catch (e) {
+    if (e instanceof Error){
+      if (e.message.toLowerCase().includes("already verified")) {
+        console.log("Already Verified!")
+      } else {
+        console.log(e)
+      }
+    }
+    }
+   
+}
+
+
+
+main().then(()=> {
+  process.exit(1);
+}).catch(err => {
+  console.log(err);
+  process.exit(0);
+})
