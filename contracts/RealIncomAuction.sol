@@ -80,8 +80,8 @@ contract RealIncomAuction is Ownable {
         _;
     }
 
-    constructor(address IncomNft, address _accessController) {
-        nftContract = RealIncomNft(IncomNft);
+    constructor(address _incomNft, address _accessController) {
+        nftContract = RealIncomNft(_incomNft);
         accessController = RealIncomAccessControl(_accessController);
         auctionId = 0;
     }

@@ -30,7 +30,6 @@ contract VillageSquare is Escrow{
     uint256 disputeCount;
 
     constructor(address _auctionContract, address _accessController){
-        agentOperator = _agent;
         auctionContract = _auctionContract;
         accessController = _accessController;
         disputeCount = 0;

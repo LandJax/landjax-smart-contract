@@ -32,13 +32,17 @@ contract AddressManager{
         accessControlAddress = _accessControlAddress;
         auctionAddress = _auctionAddress;
         nftAddress = _nftAddress;
+        addressManagerAddress = address(this);
         villageSquareAddress = _villageSquareAddress;
         _accessController = RealIncomAccessControl(_accessControlAddress);
-        addressManagerAddress = address(this);
+        _nftContract = RealIncomNft(_nftAddress);
+        _auctionContract = RealIncomAuction(_auctionAddress);
+        _villageSquareContract = VillageSquare(_villageSquareAddress);
+       
     }
 
     modifier onlyAuthorized {
-        require(_accessController.isAuthorized || _accessController.isAdmin, "Only authorized handlers are allowed!");
+        require(_accessController.isAuthorized(msg.sender), "Only authorized handlers are allowed!");
     }
 
     function updateAccessControlAddress(address _accessControlAddress) public onlyAuthorized{
