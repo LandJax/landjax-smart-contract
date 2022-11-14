@@ -2,27 +2,33 @@
 
 pragma solidity ^0.8.7;
 
+import "./AddressManager.sol";
+
 contract RealIncomAccessControl{
     mapping(address => bool) private admins;
     address private owner;
+    AddressManager addressManager;
 
     constructor(){
         owner = msg.sender;
         admins[msg.sender] = true;
+         
     }
 
     event AdminCreated(address admin, bool isAdmin);
+    event AddressManagerUpdated(address addressManagerAddress, address innitiator);
+
 
     function isAuthorized(address sender) public view returns(bool){
-        return (sender == owner || admins[msg.sender]);
+        // allow authorized addresses or address manager contract to effect change accross contract.
+        return (sender == owner || admins[msg.sender] || addressManager.addressManagerAddress);
     }
 
+    // define modifier for authorization
     modifier onlyAuthorized {
         require(msg.sender == owner || admins[msg.sender], "only Authorized Personnel are allowed");
         _;
     }
-
-
 
     function isAdmin (address sender) public view returns(bool){
         return admins[sender];
@@ -31,6 +37,10 @@ contract RealIncomAccessControl{
     function makeAdmin (address sender) public onlyAuthorized{
         admins[sender] = true;
         emit AdminCreated(sender, admins[sender]);
+    }
+
+    function updateAddressManager(address _addressManagerAddress) public onlyAuthorized {
+        addressManager = AddressManager(_addressManagerAddress);
     }
 }
 

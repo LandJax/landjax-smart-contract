@@ -10,7 +10,7 @@ import "./RealIncomAccessControl.sol";
 contract VillageSquare is Escrow{
 
     address agentOperator;
-    RealIncomauction public auctionContract;
+    RealIncomAuction public auctionContract;
     RealIncomAccessControl public accessController;
 
     event DisputeResolved(address _fundReceiver, uint256 payment, uint256 disputeId);
