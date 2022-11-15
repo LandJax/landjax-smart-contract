@@ -48,7 +48,7 @@ contract VillageSquare is Escrow{
 
     function dispute(address disputeReporter, uint256 _auctionId, string memory _message, string memory _email, string memory _phone) public{
         require(auctionContract.auctions[_auctionId].seller == disputeReporter || auctionContract.auctions[_auctionId].buyer == disputeReporter, "You are not involved in this transaction");
-        _disputes[disputeCount] = Dispute(auctionContract.auctions[_auctionId].seller, auctionContract.auctions[_auctionId].buyer, _message, _email, _phone);
+        _disputes[disputeCount] = Dispute(auctionContract.auctions[_auctionId].seller, _auctionId, auctionContract.auctions[_auctionId].buyer, _message, _email, _phone);
         // emit Dispute reported
         emit DisputeReported(disputeReporter, _auctionId, _message, _email, _phone);
     }
@@ -61,7 +61,7 @@ contract VillageSquare is Escrow{
             require(payment > 0, "There is no fund reserved for the payee");
         }
 
-        payable(_fundReceiver).transfer(payment);
+        auctionContract.resolveAuction(_disputes[_disputeId].auctionId, _fundReceiver);
         emit DisputeResolved(_fundReceiver, payment, _disputeId);
     }
 

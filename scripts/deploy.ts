@@ -43,6 +43,14 @@ async function main() {
   await addressManagerContract.deployTransaction.wait(6)
   console.log("Contract Deployed to... ", addressManagerContract.address)
   await verify(addressManagerContract.address, [])
+
+  await realIncomAccessControlContract.updateAddressManager(addressManagerContract.address)
+  console.log("updating address manager on access control contract...")
+  await realIncomAccessControlContract.wait(1)
+  let newAddressManagerAddress = await realIncomAccessControlContract.addressManager()
+  console.log("Address updated to ...", newAddressManagerAddress.address)
+
+
 }
 
 const verify = async (contractAddress:string, args: any) => {

@@ -7,7 +7,7 @@ import "./AddressManager.sol";
 contract RealIncomAccessControl{
     mapping(address => bool) private admins;
     address private owner;
-    AddressManager addressManager;
+    AddressManager public addressManager;
 
     constructor(){
         owner = msg.sender;
@@ -30,6 +30,7 @@ contract RealIncomAccessControl{
         _;
     }
 
+    // check if sender is admin
     function isAdmin (address sender) public view returns(bool){
         return admins[sender];
     }
@@ -41,6 +42,8 @@ contract RealIncomAccessControl{
 
     function updateAddressManager(address _addressManagerAddress) public onlyAuthorized {
         addressManager = AddressManager(_addressManagerAddress);
+        emit AddressManagerUpdated(_addressManagerAddress, msg.sender);
+
     }
 }
 
