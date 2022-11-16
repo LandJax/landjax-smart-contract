@@ -43,6 +43,7 @@ contract AddressManager{
 
     modifier onlyAuthorized {
         require(_accessController.isAuthorized(msg.sender), "Only authorized handlers are allowed!");
+        _;
     }
 
     function updateAccessControlAddress(address _accessControlAddress) public onlyAuthorized{
@@ -63,7 +64,6 @@ contract AddressManager{
 
     function updateNftAddress(address _nftAddress) public onlyAuthorized{
         nftAddress = _nftAddress;
-        _nftContract.updateNftContract(_nftAddress);
         _nftContract = RealIncomNft(_nftAddress);
         emit NftAddressUpdated(_nftAddress, msg.sender);
     }

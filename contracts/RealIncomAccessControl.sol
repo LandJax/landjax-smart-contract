@@ -6,11 +6,11 @@ import "./AddressManager.sol";
 
 contract RealIncomAccessControl{
     mapping(address => bool) private admins;
-    address private owner;
+    address private _owner;
     AddressManager public addressManager;
 
     constructor(){
-        owner = msg.sender;
+        _owner = msg.sender;
         admins[msg.sender] = true;
          
     }
@@ -21,12 +21,12 @@ contract RealIncomAccessControl{
 
     function isAuthorized(address sender) public view returns(bool){
         // allow authorized addresses or address manager contract to effect change accross contract.
-        return (sender == owner || admins[msg.sender] || addressManager.addressManagerAddress);
+        return (sender == _owner || admins[msg.sender] || msg.sender == addressManager.addressManagerAddress());
     }
 
     // define modifier for authorization
     modifier onlyAuthorized {
-        require(msg.sender == owner || admins[msg.sender], "only Authorized Personnel are allowed");
+        require(msg.sender == _owner || admins[msg.sender], "only Authorized Personnel are allowed");
         _;
     }
 

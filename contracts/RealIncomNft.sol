@@ -21,12 +21,13 @@ contract RealIncomNft is ERC721URIStorage {
         uint256 tokenId
     );
 
+    event  AccessControlContractUpdated(address indexed accessController, address indexed innitiator);
     struct DigiAsset {
         address _owner;
         string _title;
         string _description;
         string _digiURI;
-        int256 _amount;
+        uint256 netWorth;
         uint256 _tokenId;
     }
     mapping(uint256 => DigiAsset) public tokenIdToNft;
@@ -39,8 +40,8 @@ contract RealIncomNft is ERC721URIStorage {
     function mintNFT(
         string memory _title,
         string memory _description,
-        string memory _digiURI,
-        int256 _amount
+        string memory _digiURI
+        
     ) public returns (uint256) {
         tokenIdCounter += 1;
         tokenIdToNft[tokenIdCounter] = DigiAsset(
@@ -48,7 +49,7 @@ contract RealIncomNft is ERC721URIStorage {
             _title,
             _description,
             _digiURI,
-            _amount,
+            0,
             tokenIdCounter
         );
         _safeMint(msg.sender, tokenIdCounter);
@@ -58,7 +59,7 @@ contract RealIncomNft is ERC721URIStorage {
             _title,
             _description,
             _digiURI,
-            _amount,
+            0,
             tokenIdCounter
         );
         return tokenIdCounter;
@@ -80,7 +81,19 @@ contract RealIncomNft is ERC721URIStorage {
         return NftBaseURI;
     }
 
-    function updateAccessControlContract(address _accessController) public onlyAuthorised{
+    function setNftValue(uint256 nftWorth, uint256 _tokenId) public {
+        tokenIdToNft[_tokenId].netWorth = nftWorth;
+    }
+
+    function safeTransfer( address from,
+        address to,
+        uint256 tokenId) public {
+         require(isApprovedForAll(msg.sender, address(this)), "ERC721: caller is not token owner or approved");
+         tokenIdToNft[tokenId]._owner = msg.sender;
+        _safeTransfer(from, to, tokenId, "");
+    }
+
+    function updateAccessControlContract(address _accessController) public onlyAuthorized{
         accessController = RealIncomAccessControl(_accessController);
         emit AccessControlContractUpdated(_accessController, msg.sender);
 

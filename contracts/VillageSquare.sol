@@ -6,19 +6,45 @@ import "@openzeppelin/contracts/utils/escrow/Escrow.sol";
 import "./RealIncomAuction.sol";
 import "./RealIncomAccessControl.sol";
 
+interface AuctionInterface {
+    struct Auction {
+        uint256 tokenId;
+        uint256 startTime;
+        uint256 reservedPrice;
+        bool intergrityConfirmed;
+        bool auctionResulted;
+        uint256 endTime;
+        address seller;
+        bool isOnSale;
+    }
+}
 
-contract VillageSquare is Escrow{
-
+contract VillageSquare is Escrow, AuctionInterface {
     address agentOperator;
     RealIncomAuction public auctionContract;
     RealIncomAccessControl public accessController;
 
-    event DisputeResolved(address _fundReceiver, uint256 payment, uint256 disputeId);
-    event DisputeReported(address disputeReporter, uint256 auctionId, string _message, string _email, string _phone);
-
-    struct Dispute{
+    event DisputeResolved(
+        address _fundReceiver,
+        uint256 payment,
+        uint256 disputeId
+    );
+    event DisputeReported(
+        address disputeReporter,
+        uint256 auctionId,
+        string _message,
+        string _email,
+        string _phone
+    );
+    event AuctionContractUpdated(address _auctionContract, address sender);
+    event AccessControlContractUpdated(
+        address _accessController,
+        address sender
+    );
+    struct Dispute {
         address seller; //seller is payee
-        address buyer; 
+        address buyer;
+        uint256 auctionId;
         string message;
         string email;
         string phone;
@@ -29,15 +55,16 @@ contract VillageSquare is Escrow{
 
     uint256 disputeCount;
 
-    constructor(address _auctionContract, address _accessController){
-        auctionContract = _auctionContract;
-        accessController = _accessController;
+    constructor(
+        address _auctionContractAddreas,
+        address _accessControllerAddress
+    ) {
+        auctionContract = RealIncomAuction(_auctionContractAddreas);
+        accessController = RealIncomAccessControl(_accessControllerAddress);
         disputeCount = 0;
-
     }
 
-
-     modifier onlyAuthorized() {
+    modifier onlyAuthorized() {
         require(
             accessController.isAuthorized(msg.sender),
             "You're not Authorized"
@@ -45,35 +72,73 @@ contract VillageSquare is Escrow{
         _;
     }
 
+    function dispute(
+        uint256 _auctionId,
+        string memory _message,
+        string memory _email,
+        string memory _phone
+    ) public {
+        (
+            /*uint256 tokenId*/,
+            /*uint256 startTime*/,
+            /*uint256 reservedPrice*/,
+            /*bool intergrityConfirmed*/,
+            /*bool auctionResulted*/,
+            /*uint256 endTime*/,
+            address seller,
+            /*bool isOnSale*/
+        ) = auctionContract.fetchAuction(_auctionId);
 
-    function dispute(address disputeReporter, uint256 _auctionId, string memory _message, string memory _email, string memory _phone) public{
-        require(auctionContract.auctions[_auctionId].seller == disputeReporter || auctionContract.auctions[_auctionId].buyer == disputeReporter, "You are not involved in this transaction");
-        _disputes[disputeCount] = Dispute(auctionContract.auctions[_auctionId].seller, _auctionId, auctionContract.auctions[_auctionId].buyer, _message, _email, _phone);
+        (address bidder, uint256 bid,  /*uint256 bidTime*/) = auctionContract
+            .fetchBid(_auctionId);
+        [_auctionId];
+        require(
+            seller == msg.sender || bidder == msg.sender,
+            "You are not involved in this transaction"
+        );
+        _disputes[disputeCount] = Dispute(
+            seller,
+            bidder,
+            _auctionId,
+            _message,
+            _email,
+            _phone,
+            block.timestamp
+        );
         // emit Dispute reported
-        emit DisputeReported(disputeReporter, _auctionId, _message, _email, _phone);
+        emit DisputeReported(msg.sender, _auctionId, _message, _email, _phone);
     }
 
-    function resolveVillageDispute(address _fundReceiver, uint256 _disputeId) public onlyAuthorized{
-        require(_disputes[_disputeId].seller == fundReceiver || _disputes[_disputeId].buyer ==  _fundReceiver, "the Specified fund receiver is not involved in the village dispute specify the token seller or buyer");
-        uint256 payment = _deposits[_disputes[_disputeId].seller];
-        if (payment == 0){
-            payment = _deposits[_disputes[_disputeId].buyer];
-            require(payment > 0, "There is no fund reserved for the payee");
-        }
-
-        auctionContract.resolveAuction(_disputes[_disputeId].auctionId, _fundReceiver);
-        emit DisputeResolved(_fundReceiver, payment, _disputeId);
+    function resolveVillageDispute(address _fundReceiver, uint256 _disputeId)
+        public
+        onlyAuthorized
+    {
+        auctionContract.resolveAuction(
+            _disputes[_disputeId].auctionId,
+            _fundReceiver
+        );
+        (address bidder, uint256 bid,  /*uint256 bidTime*/) = auctionContract
+            .fetchBid(_disputes[_disputeId].auctionId);
+        emit DisputeResolved(
+            _fundReceiver,
+            bid,
+            _disputeId
+        );
     }
 
-    function updateAuctionContract(address _auctionContract) public onlyAuthorised{
+    function updateAuctionContract(address _auctionContract)
+        public
+        onlyAuthorized
+    {
         auctionContract = RealIncomAuction(_auctionContract);
         emit AuctionContractUpdated(_auctionContract, msg.sender);
     }
 
-    function updateAccessControlContract(address _accessController) public onlyAuthorised{
+    function updateAccessControlContract(address _accessController)
+        public
+        onlyAuthorized
+    {
         accessController = RealIncomAccessControl(_accessController);
         emit AccessControlContractUpdated(_accessController, msg.sender);
-
     }
-
 }

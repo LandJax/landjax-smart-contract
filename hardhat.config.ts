@@ -17,12 +17,6 @@ const config: HardhatUserConfig = {
       gas: 2100000,
       gasPrice: 8000000000
     },
-    goerli: {
-      url: GOERLI_TESTNET_URL,
-      accounts: [PRIVATE_KEY],
-      gas: 2100000,
-      gasPrice: 8000000000
-    }
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY
