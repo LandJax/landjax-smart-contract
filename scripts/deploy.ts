@@ -1,59 +1,76 @@
-import { ethers, run } from "hardhat";
+import { ethers, run, network } from "hardhat";
 import process from 'process';
 
 
 
 async function main() {
+  let isLocalNetwork: boolean = network.config.chainId == 31337
   const realIncomAccessControlFactory = await ethers.getContractFactory("RealIncomAccessControl");
   const realIncomAccessControlContract = await realIncomAccessControlFactory.deploy();
   await realIncomAccessControlContract.deployed();
-  await realIncomAccessControlContract.deployTransaction.wait(6)
-  console.log("Contract Deployed to... ", realIncomAccessControlContract.address)
-  await verify(realIncomAccessControlContract.address, [])
+  console.log("Contract Deployed to... Access Controls", realIncomAccessControlContract.address)
+  if (!isLocalNetwork) {
+    await realIncomAccessControlContract.deployTransaction.wait(6)
 
- 
+    await verify(realIncomAccessControlContract.address, [])
+  }
+
+
 
   const realIncomNftFactory = await ethers.getContractFactory("RealIncomNft");
   const realIncomNftContract = await realIncomNftFactory.deploy(realIncomAccessControlContract.address);
   await realIncomNftContract.deployed();
-  await realIncomNftContract.deployTransaction.wait(6)
-  console.log("Contract Deployed to... ", realIncomNftContract.address)
+  console.log("Contract Deployed to... NFT", realIncomNftContract.address)
+  if (!isLocalNetwork) {
+    await realIncomNftContract.deployTransaction.wait(6)
 
-  await verify(realIncomNftContract.address, [])
-
+    await verify(realIncomNftContract.address, [realIncomAccessControlContract.address])
+  }
 
   const realIncomAuctionFactory = await ethers.getContractFactory("RealIncomAuction");
-  const realIncomAuctionContract = await realIncomAuctionFactory.deploy(realIncomNftContract.address,realIncomAccessControlContract.address);
+  const realIncomAuctionContract = await realIncomAuctionFactory.deploy(realIncomNftContract.address, realIncomAccessControlContract.address);
   await realIncomAuctionContract.deployed();
-  await realIncomAuctionContract.deployTransaction.wait(6)
-  console.log("Contract Deployed to... ", realIncomNftContract.address)
+  console.log("Contract Deployed to... Auction", realIncomAuctionContract.address)
+  if (!isLocalNetwork) {
+    await realIncomAuctionContract.deployTransaction.wait(6)
 
-  await verify(realIncomAuctionContract.address, [])
-
+    await verify(realIncomAuctionContract.address, [realIncomNftContract.address, realIncomAccessControlContract.address])
+  }
   const villageSquareFactory = await ethers.getContractFactory("VillageSquare");
   const villageSquareContract = await villageSquareFactory.deploy(realIncomAuctionContract.address, realIncomAccessControlContract.address);
   await villageSquareContract.deployed();
-  await villageSquareContract.deployTransaction.wait(6)
-  console.log("Contract Deployed to... ", villageSquareContract.address)
-  await verify(villageSquareContract.address, [])
+  console.log("Contract Deployed to... Village Square", villageSquareContract.address)
+  if (!isLocalNetwork) {
+    await villageSquareContract.deployTransaction.wait(6)
 
+    await verify(villageSquareContract.address, [realIncomAuctionContract.address, realIncomAccessControlContract.address])
+  }
   const addressManagerFactory = await ethers.getContractFactory("AddressManager");
   const addressManagerContract = await addressManagerFactory.deploy(realIncomAccessControlContract.address, realIncomAuctionContract.address, realIncomNftContract.address, villageSquareContract.address);
   await addressManagerContract.deployed();
-  await addressManagerContract.deployTransaction.wait(6)
-  console.log("Contract Deployed to... ", addressManagerContract.address)
-  await verify(addressManagerContract.address, [])
+  console.log("Contract Deployed to... Address Manager", addressManagerContract.address)
+  if (!isLocalNetwork) {
+    await addressManagerContract.deployTransaction.wait(6)
 
-  await realIncomAccessControlContract.updateAddressManager(addressManagerContract.address)
+    await verify(addressManagerContract.address, [realIncomAccessControlContract.address, realIncomAuctionContract.address, realIncomNftContract.address, villageSquareContract.address])
+  }
+  let addressChangeTxn = await realIncomAccessControlContract.updateAddressManager(addressManagerContract.address)
   console.log("updating address manager on access control contract...")
-  await realIncomAccessControlContract.wait(1)
+  await addressChangeTxn.wait(1)
   let newAddressManagerAddress = await realIncomAccessControlContract.addressManager()
-  console.log("Address updated to ...", newAddressManagerAddress.address)
+  console.log("Address updated to ...", newAddressManagerAddress)
+  console.log({
+    "Access Controls": realIncomAccessControlContract.address,
+    "NFT": realIncomNftContract.address,
+    "Auction": realIncomAuctionContract.address,
+    "Village Square": villageSquareContract.address,
+    "Address Manager": addressManagerContract.address,
 
+  })
 
 }
 
-const verify = async (contractAddress:string, args: any) => {
+const verify = async (contractAddress: string, args: any) => {
   console.log("Verifying contract...")
   try {
     await run("verify:verify", {
@@ -62,22 +79,21 @@ const verify = async (contractAddress:string, args: any) => {
     })
 
   } catch (e) {
-    if (e instanceof Error){
+    if (e instanceof Error) {
       if (e.message.toLowerCase().includes("already verified")) {
         console.log("Already Verified!")
       } else {
         console.log(e)
       }
     }
-    }
-   
+  }
+
 }
 
 
-
-main().then(()=> {
-  process.exit(1);
+main().then(() => {
+  process.exit(0);
 }).catch(err => {
   console.log(err);
-  process.exit(0);
+  process.exit(1);
 })

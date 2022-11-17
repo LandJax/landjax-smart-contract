@@ -79,17 +79,15 @@ contract VillageSquare is Escrow, AuctionInterface {
         string memory _phone
     ) public {
         (
-            /*uint256 tokenId*/,
-            /*uint256 startTime*/,
-            /*uint256 reservedPrice*/,
+         
             /*bool intergrityConfirmed*/,
             /*bool auctionResulted*/,
             /*uint256 endTime*/,
-            address seller,
-            /*bool isOnSale*/
+            address seller
+           
         ) = auctionContract.fetchAuction(_auctionId);
 
-        (address bidder, uint256 bid,  /*uint256 bidTime*/) = auctionContract
+        (address bidder, /*uint256 bid*/,  /*uint256 bidTime*/) = auctionContract
             .fetchBid(_auctionId);
         [_auctionId];
         require(
@@ -117,7 +115,7 @@ contract VillageSquare is Escrow, AuctionInterface {
             _disputes[_disputeId].auctionId,
             _fundReceiver
         );
-        (address bidder, uint256 bid,  /*uint256 bidTime*/) = auctionContract
+        (/*address bidder*/, uint256 bid,  /*uint256 bidTime*/) = auctionContract
             .fetchBid(_disputes[_disputeId].auctionId);
         emit DisputeResolved(
             _fundReceiver,

@@ -9,7 +9,6 @@ import "./RealIncomAccessControl.sol";
 import "./VillageSquare.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-
 contract RealIncomAuction is Ownable {
     using SafeMath for uint256;
 
@@ -107,7 +106,7 @@ contract RealIncomAuction is Ownable {
         uint256 startTime,
         uint256 endTime,
         uint256 reservedPrice
-    ) public returns(uint256){
+    ) public returns (uint256) {
         auctionIdCounter += 1;
         auctions[auctionIdCounter] = Auction(
             tokenId,
@@ -158,7 +157,10 @@ contract RealIncomAuction is Ownable {
     {
         // Call returns a boolean value indicating success or failure.
         // This is the current recommended method to use.
-        (bool sent, /*bytes memory data*/) = payable(_to).call{value: _amountvalue}("");
+        (
+            bool sent, /*bytes memory data*/
+
+        ) = payable(_to).call{value: _amountvalue}("");
         require(sent, "Failed to send Matic");
         emit ValueSent(payable(_to), _amountvalue);
     }
@@ -177,9 +179,7 @@ contract RealIncomAuction is Ownable {
         HighestBidder memory highestBidder = highestBids[_auctionId];
         uint256 minBid = highestBidder.bid.add(minimumBidIncrement);
         if (highestBidder.bid == 0) {
-            minBid = highestBids[_auctionId].bid.add(
-                minimumBidIncrement
-            );
+            minBid = highestBids[_auctionId].bid.add(minimumBidIncrement);
         }
 
         require(msg.value > minBid, "You did not outbid the highest bidder");
@@ -221,23 +221,15 @@ contract RealIncomAuction is Ownable {
         returns (
             uint256 tokenId,
             uint256 startTime,
-            uint256 reservedPrice,
             bool intergrityConfirmed,
-            bool auctionResulted,
-            uint256 endTime,
-            address seller,
-            bool isOnSale
+            address seller
         )
     {
         return (
             auctions[_auctionId].tokenId,
             auctions[_auctionId].startTime,
-            auctions[_auctionId].reservedPrice,
             auctions[_auctionId].intergrityConfirmed,
-            auctions[_auctionId].resulted,
-            auctions[_auctionId].endTime,
-            auctions[_auctionId].seller,
-            auctions[_auctionId].isOnSale
+            auctions[_auctionId].seller
         );
         // return auctions[_auctionId];
     }
@@ -260,7 +252,10 @@ contract RealIncomAuction is Ownable {
     }
 
     // setAuctionEndTime
-    function setAuctionEndTime(uint256 _auctionId, uint256 _newEndTime) public returns(uint256){
+    function setAuctionEndTime(uint256 _auctionId, uint256 _newEndTime)
+        public
+        returns (uint256)
+    {
         require(
             msg.sender == auctions[_auctionId].seller,
             "you are not the seller"
@@ -282,7 +277,8 @@ contract RealIncomAuction is Ownable {
 
     // SetAuctionStartTime
     function setAuctionStartTime(uint256 _auctionId, uint256 _newStartTime)
-        public returns(uint256)
+        public
+        returns (uint256)
     {
         require(
             msg.sender == auctions[_auctionId].seller,
@@ -323,7 +319,11 @@ contract RealIncomAuction is Ownable {
             "Operator or contract not approved"
         );
         HighestBidder memory highestBidder = highestBids[_auctionId];
-        nftContract.safeTransfer(msg.sender, highestBidder.bidder, auctions[_auctionId].tokenId);
+        nftContract.safeTransfer(
+            msg.sender,
+            highestBidder.bidder,
+            auctions[_auctionId].tokenId
+        );
         auctions[_auctionId].resulted = true;
         auctions[_auctionId].isOnSale = false;
         // payable(msg.sender).transfer(highestBidder.bid);
