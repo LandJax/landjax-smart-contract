@@ -1,5 +1,6 @@
 import { ethers, run, network } from "hardhat";
 import process from 'process';
+import fs from 'fs';
 
 
 
@@ -59,6 +60,16 @@ async function main() {
   await addressChangeTxn.wait(1)
   let newAddressManagerAddress = await realIncomAccessControlContract.addressManager()
   console.log("Address updated to ...", newAddressManagerAddress)
+
+  fs.writeFileSync("addressesLocal.json", JSON.stringify({
+    "Access Controls": realIncomAccessControlContract.address,
+    "NFT": realIncomNftContract.address,
+    "Auction": realIncomAuctionContract.address,
+    "Village Square": villageSquareContract.address,
+    "Address Manager": addressManagerContract.address,
+
+  }))
+
   console.log({
     "Access Controls": realIncomAccessControlContract.address,
     "NFT": realIncomNftContract.address,
