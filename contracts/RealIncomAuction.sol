@@ -41,6 +41,7 @@ contract RealIncomAuction is Ownable {
     mapping(uint256 => HighestBidder) public highestBids;
 
     event AuctionCreated(
+        uint256 auctionId,
         uint256 tokenId,
         uint256 startTime,
         uint256 reservedPrice,
@@ -57,7 +58,7 @@ contract RealIncomAuction is Ownable {
         address indexed sender
     );
 
-    event BidPlaced(uint256 BidAmount, address Bidder, uint256 bidTime);
+    event BidPlaced(uint256 BidAmount, address Bidder, uint256 bidTime, uint256 auctionId, uint256 tokenId);
 
     event AuctionCancelled(uint256 auctionId, uint256 tokenId, address seller);
 
@@ -74,7 +75,8 @@ contract RealIncomAuction is Ownable {
         address seller,
         address winner,
         uint256 winningBid,
-        uint256 endTime
+        uint256 endTime,
+        uint256 auctionId
     );
 
     event AuctionEndTimeModified(
@@ -119,6 +121,7 @@ contract RealIncomAuction is Ownable {
             true
         );
         emit AuctionCreated(
+            auctionIdCounter,
             tokenId,
             startTime,
             reservedPrice,
@@ -193,7 +196,7 @@ contract RealIncomAuction is Ownable {
             block.timestamp
         );
         nftContract.setNftValue(msg.value, auctions[_auctionId].tokenId);
-        emit BidPlaced(msg.value, msg.sender, block.timestamp);
+        emit BidPlaced(msg.value, msg.sender, block.timestamp, _auctionId, auctions[_auctionId].tokenId);
         // Emit Bid event
     }
 
@@ -332,7 +335,8 @@ contract RealIncomAuction is Ownable {
             auctions[_auctionId].seller,
             msg.sender,
             highestBidder.bid,
-            block.timestamp
+            block.timestamp,
+            _auctionId
         );
         // Emit AuctionResulted
     }
