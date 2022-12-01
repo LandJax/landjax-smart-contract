@@ -6,8 +6,9 @@ import "./RealIncomAccessControl.sol";
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract RealIncomNft is ERC721URIStorage {
+contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
     uint256 tokenIdCounter;
     string private NftBaseURI;
     RealIncomAccessControl accessController;
@@ -18,7 +19,8 @@ contract RealIncomNft is ERC721URIStorage {
         string description,
         string digiURI,
         int256 amount,
-        uint256 tokenId
+        uint256 tokenId,
+        string productLink
     );
 
     event  AccessControlContractUpdated(address indexed accessController, address indexed innitiator);
@@ -27,8 +29,14 @@ contract RealIncomNft is ERC721URIStorage {
         string _title;
         string _description;
         string _digiURI;
-        uint256 netWorth;
+        uint256 _worth;
         uint256 _tokenId;
+        uint256 _productAge;
+        string _revenue;
+        string _expenses;
+        string _traffic;
+        string location;
+        string _productLink;
     }
     mapping(uint256 => DigiAsset) public tokenIdToNft;
 
@@ -40,7 +48,8 @@ contract RealIncomNft is ERC721URIStorage {
     function mintNFT(
         string memory _title,
         string memory _description,
-        string memory _digiURI
+        string memory _digiURI,
+        uint256 productAge
         
     ) public returns (uint256) {
         tokenIdCounter += 1;
@@ -50,7 +59,8 @@ contract RealIncomNft is ERC721URIStorage {
             _description,
             _digiURI,
             0,
-            tokenIdCounter
+            tokenIdCounter,
+            productAge
         );
         _safeMint(msg.sender, tokenIdCounter);
         _setTokenURI(tokenIdCounter, _digiURI);
@@ -70,6 +80,10 @@ contract RealIncomNft is ERC721URIStorage {
             accessController.isAuthorized(msg.sender),
             "You're not Authorized"
         );
+
+        // if (!accessController.isAuthorized(msg.sender)){
+        //     revert("You're not Authorized");
+        // }
         _;
     }
 
@@ -82,12 +96,12 @@ contract RealIncomNft is ERC721URIStorage {
     }
 
     function setNftValue(uint256 nftWorth, uint256 _tokenId) public {
-        tokenIdToNft[_tokenId].netWorth = nftWorth;
+        tokenIdToNft[_tokenId].worth = nftWorth;
     }
 
     function safeTransfer( address from,
         address to,
-        uint256 tokenId) public {
+        uint256 tokenId) public nonReentrant{
          require(isApprovedForAll(msg.sender, address(this)), "ERC721: caller is not token owner or approved");
          tokenIdToNft[tokenId]._owner = msg.sender;
         _safeTransfer(from, to, tokenId, "");
@@ -98,4 +112,6 @@ contract RealIncomNft is ERC721URIStorage {
         emit AccessControlContractUpdated(_accessController, msg.sender);
 
     }
+
+    
 }
