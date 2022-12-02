@@ -18,8 +18,13 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
         string title,
         string description,
         string digiURI,
-        int256 amount,
+        uint256 worth,
         uint256 tokenId,
+        uint256 productAge,
+        uint256 revenue,
+        uint256 expenses,
+        uint256 traffic,
+        string location,
         string productLink
     );
 
@@ -78,12 +83,17 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
         _safeMint(msg.sender, tokenIdCounter);
         _setTokenURI(tokenIdCounter, _digiURI);
         emit NftMinted(
-            msg.sender,
+           msg.sender,
             _title,
             _description,
             _digiURI,
             0,
             tokenIdCounter,
+            productAge,
+            monthlyRevenue,
+            monthlyExpenses,
+            monthlyTraffic,
+            location,
             productLink
         );
         return tokenIdCounter;
@@ -111,6 +121,14 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
 
     function setNftValue(uint256 nftWorth, uint256 _tokenId) public {
         tokenIdToNft[_tokenId]._worth = nftWorth;
+    }
+
+    function fetchNftValue(uint256 _tokenId) public view returns(uint256) {
+        return tokenIdToNft[_tokenId]._worth;
+    }
+
+    function seeNft(uint256 _tokenId) public view returns(string memory, string memory, string memory){
+        return (tokenIdToNft[_tokenId]._title, tokenIdToNft[_tokenId]._description, tokenIdToNft[_tokenId]._productLink);
     }
 
     function safeTransfer( address from,

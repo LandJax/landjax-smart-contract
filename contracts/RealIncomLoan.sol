@@ -50,7 +50,7 @@ contract RealIncomLoan is ReentrancyGuard {
         bool isApproved,
         address lender,
         uint256 loanId,
-        uint256 borrowId
+        uint256 borrowerId
     );
 
     event LoanPayed(
@@ -131,8 +131,8 @@ contract RealIncomLoan is ReentrancyGuard {
         uint256 roi
     ) public payable nonReentrant {
         require(
-            msg.value > 0 && loanDuration > 0 && toBePaidMonthly > 0,
-            "you have insufficient balance for this loan"
+            msg.value > 0 || loanDuration > 0 || toBePaidMonthly > 0,
+            "value or loan duration or monthly payment is zero"
         );
         loanCounter += 1;
         loans[loanCounter] = Loan(
@@ -196,6 +196,12 @@ contract RealIncomLoan is ReentrancyGuard {
             revert("Sender not Nft owner");
         }
 
+        uint256 nftWorth = nftContract.fetchNftValue(collateralTokenId);
+
+        if (nftWorth < _amount) {
+            revert("Your Nft does not have enough value to be used a collateral for this loan");
+        }
+
         nftContract.safeTransferFrom(
             msg.sender,
             address(this),
@@ -240,9 +246,9 @@ contract RealIncomLoan is ReentrancyGuard {
         );
 
         uint256 amountToSend = borrowers[borrowerId].amountBorrowed;
-        loans[loanId].amountSupplied.sub(amountToSend);
-        loans[loanId].lentOut.add(amountToSend);
-        sendViaCall(address(this), amountToSend);
+        loans[loanId].amountSupplied = loans[loanId].amountSupplied.sub(amountToSend);
+        loans[loanId].lentOut = loans[loanId].lentOut.add(amountToSend);
+        sendViaCall(borrowers[borrowerId].borrower, amountToSend);
         borrowers[borrowerId].isApproved = true;
         // transfer nft to smart contract
         emit MoneyBorrowed(
@@ -269,7 +275,7 @@ contract RealIncomLoan is ReentrancyGuard {
         uint256 baseAmount = borrowers[borrowerId].amountBorrowed;
         uint256 amountToPayBack = loanInterest.add(baseAmount);
         if (amountToPayBack > msg.value) {
-            console.log(
+           revert(
                 "Please Top up, you do not have sufficient funds to payback"
             );
         }

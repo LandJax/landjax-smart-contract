@@ -46,15 +46,30 @@ async function main() {
 
     await verify(villageSquareContract.address, [realIncomAuctionContract.address, realIncomAccessControlContract.address])
   }
+
+  const RealIncomLoanFactory = await ethers.getContractFactory("RealIncomLoan");
+  const RealIncomLoanContract = await RealIncomLoanFactory.deploy(realIncomNftContract.address, realIncomAccessControlContract.address);
+  await RealIncomLoanContract.deployed();
+  console.log("Contract Deployed to... Real Incom Loan", RealIncomLoanContract.address)
+  if (!isLocalNetwork) {
+    await RealIncomLoanContract.deployTransaction.wait(6)
+
+    await verify(RealIncomLoanContract.address, [realIncomNftContract.address, realIncomAccessControlContract.address])
+  }
+
   const addressManagerFactory = await ethers.getContractFactory("AddressManager");
-  const addressManagerContract = await addressManagerFactory.deploy(realIncomAccessControlContract.address, realIncomAuctionContract.address, realIncomNftContract.address, villageSquareContract.address);
+  const addressManagerContract = await addressManagerFactory.deploy(realIncomAccessControlContract.address, realIncomAuctionContract.address, realIncomNftContract.address, villageSquareContract.address, RealIncomLoanContract.address);
   await addressManagerContract.deployed();
   console.log("Contract Deployed to... Address Manager", addressManagerContract.address)
   if (!isLocalNetwork) {
     await addressManagerContract.deployTransaction.wait(6)
 
-    await verify(addressManagerContract.address, [realIncomAccessControlContract.address, realIncomAuctionContract.address, realIncomNftContract.address, villageSquareContract.address])
+    await verify(addressManagerContract.address, [realIncomAccessControlContract.address, realIncomAuctionContract.address, realIncomNftContract.address, villageSquareContract.address, RealIncomLoanContract.address])
   }
+
+
+ 
+
   let addressChangeTxn = await realIncomAccessControlContract.updateAddressManager(addressManagerContract.address)
   console.log("updating address manager on access control contract...")
   await addressChangeTxn.wait(1)
@@ -67,6 +82,7 @@ async function main() {
     "Auction": realIncomAuctionContract.address,
     "Village Square": villageSquareContract.address,
     "Address Manager": addressManagerContract.address,
+    "Loan": RealIncomLoanContract.address
 
   }))
 
@@ -76,6 +92,8 @@ async function main() {
     "Auction": realIncomAuctionContract.address,
     "Village Square": villageSquareContract.address,
     "Address Manager": addressManagerContract.address,
+    "Loan": RealIncomLoanContract.address
+
 
   })
 

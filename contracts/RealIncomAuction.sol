@@ -26,6 +26,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         bool resulted;
         uint256 endTime;
         address seller;
+        address buyer;
         bool isOnSale;
         string sellType;
     }
@@ -54,6 +55,11 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         bool isOnSale,
         string sellType
     );
+
+    event ResultsConfirmed(address seller, address buyer, bool isOnsale, bool intergrityConfirmed, uint256 tokenId );
+
+
+    event ValueReceived(address sender, uint256 value);
 
     event NFTContractUpdated(
         address indexed _nftContract,
@@ -85,10 +91,12 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
 
     event AuctionResulted(
         address seller,
+        address buyer,
         address winner,
         uint256 winningBid,
         uint256 endTime,
-        uint256 auctionId
+        uint256 auctionId,
+        uint256 tokenId
     );
 
     event AuctionEndTimeModified(
@@ -134,6 +142,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
             false,
             endTime,
             msg.sender,
+            address(0),
             true,
             "silver"
         );
@@ -173,7 +182,10 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
     }
 
     // Function to receive Ether. msg.data must be empty
-    receive() external payable {}
+    receive() external payable {
+        emit ValueReceived(msg.sender, msg.value);
+
+    }
 
     // Fallback function is called when msg.data is not empty
     fallback() external payable {}
@@ -237,7 +249,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
 
         payable(highestBidder.bidder).transfer(highestBidder.bid);
         sendViaCall(highestBidder.bidder, highestBidder.bid);
-        delete highestBids[auctions[_auctionId].tokenId];
+        delete highestBids[_auctionId];
         highestBids[_auctionId] = HighestBidder(
             msg.sender,
             msg.value,
@@ -273,6 +285,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         //     "user address not involved in the bid process"
         // );
 
+            // Ensure address to be rsolved is either the seller or the buyer
         if (
             highestBids[_auctionId].bidder != _to ||
             auctions[_auctionId].seller != _to
@@ -432,14 +445,17 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         );
         auctions[_auctionId].resulted = true;
         auctions[_auctionId].isOnSale = false;
+        auctions[_auctionId].buyer = highestBidder.bidder;
         // payable(msg.sender).transfer(highestBidder.bid);
         // address(villageSquareContract)
         emit AuctionResulted(
             auctions[_auctionId].seller,
+            auctions[_auctionId].buyer,
             msg.sender,
             highestBidder.bid,
             block.timestamp,
-            _auctionId
+            _auctionId,
+             auctions[_auctionId].tokenId
         );
         // Emit AuctionResulted
     }
@@ -492,8 +508,10 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         }
 
         auctions[_auctionId].intergrityConfirmed = true;
+
         sendViaCall(auctions[_auctionId].seller, highestBidder.bid);
         // emit ResultsConfirmed
+        emit ResultsConfirmed(auctions[_auctionId].seller, auctions[_auctionId].buyer, auctions[_auctionId].isOnSale, auctions[_auctionId].intergrityConfirmed, auctions[_auctionId].tokenId);
     }
 
     // withdraw auction amount

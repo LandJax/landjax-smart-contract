@@ -21,7 +21,7 @@ contract RealIncomAccessControl{
 
     function isAuthorized(address sender) public view returns(bool){
         // allow authorized addresses or address manager contract to effect change accross contract.
-        return (sender == _owner || admins[msg.sender] || msg.sender == addressManager.addressManagerAddress());
+        return (sender == _owner || admins[sender] || sender == addressManager.addressManagerAddress());
     }
 
     // define modifier for authorization

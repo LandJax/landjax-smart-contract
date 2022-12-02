@@ -12,12 +12,23 @@ interface AuctionInterface {
         uint256 startTime;
         uint256 reservedPrice;
         bool intergrityConfirmed;
-        bool auctionResulted;
+        bool resulted;
         uint256 endTime;
         address seller;
+        address buyer;
         bool isOnSale;
+        string sellType;
     }
 }
+
+
+/***
+ * overall this contract allow users to report dispute
+ * when Digital asset sale doesn't go as planned
+ * users can report disputes
+ * chiefs or authroised personnel can resolve dispute
+ * the funds is now transferred to appropriate user after dispute settlement
+ */
 
 contract VillageSquare is Escrow, AuctionInterface {
     address agentOperator;
@@ -34,7 +45,8 @@ contract VillageSquare is Escrow, AuctionInterface {
         uint256 auctionId,
         string _message,
         string _email,
-        string _phone
+        string _phone,
+        bool isSettled
     );
     event AuctionContractUpdated(address _auctionContract, address sender);
     event AccessControlContractUpdated(
@@ -45,13 +57,14 @@ contract VillageSquare is Escrow, AuctionInterface {
         address seller; //seller is payee
         address buyer;
         uint256 auctionId;
-        string message;
+        string messageQuery;
         string email;
         string phone;
         uint256 time;
+        bool isSettled;
     }
 
-    mapping(uint256 => Dispute) private _disputes;
+    mapping(uint256 => Dispute) public disputes;
 
     uint256 disputeCount;
 
@@ -74,7 +87,7 @@ contract VillageSquare is Escrow, AuctionInterface {
 
     function dispute(
         uint256 _auctionId,
-        string memory _message,
+        string memory _messageQuery,
         string memory _email,
         string memory _phone
     ) public {
@@ -94,17 +107,18 @@ contract VillageSquare is Escrow, AuctionInterface {
             seller == msg.sender || bidder == msg.sender,
             "You are not involved in this transaction"
         );
-        _disputes[disputeCount] = Dispute(
+        disputes[disputeCount] = Dispute(
             seller,
             bidder,
             _auctionId,
-            _message,
+            _messageQuery,
             _email,
             _phone,
-            block.timestamp
+            block.timestamp,
+            false
         );
         // emit Dispute reported
-        emit DisputeReported(msg.sender, _auctionId, _message, _email, _phone);
+        emit DisputeReported(msg.sender, _auctionId, _messageQuery, _email, _phone, false);
     }
 
     function resolveVillageDispute(address _fundReceiver, uint256 _disputeId)
@@ -112,11 +126,12 @@ contract VillageSquare is Escrow, AuctionInterface {
         onlyAuthorized
     {
         auctionContract.resolveAuction(
-            _disputes[_disputeId].auctionId,
+            disputes[_disputeId].auctionId,
             _fundReceiver
         );
+        disputes[_disputeId].isSettled = true;
         (/*address bidder*/, uint256 bid,  /*uint256 bidTime*/) = auctionContract
-            .fetchBid(_disputes[_disputeId].auctionId);
+            .fetchBid(disputes[_disputeId].auctionId);
         emit DisputeResolved(
             _fundReceiver,
             bid,
