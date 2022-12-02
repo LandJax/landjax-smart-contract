@@ -32,9 +32,9 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
         uint256 _worth;
         uint256 _tokenId;
         uint256 _productAge;
-        string _revenue;
-        string _expenses;
-        string _traffic;
+        uint256 _revenue;
+        uint256 _expenses;
+        uint256 _traffic;
         string location;
         string _productLink;
     }
@@ -49,7 +49,14 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
         string memory _title,
         string memory _description,
         string memory _digiURI,
-        uint256 productAge
+        uint256 productAge,
+        uint256 monthlyRevenue,
+        uint256 monthlyExpenses,
+        uint256 monthlyTraffic,
+        string memory location,
+        string memory productLink
+
+
         
     ) public returns (uint256) {
         tokenIdCounter += 1;
@@ -60,7 +67,13 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
             _digiURI,
             0,
             tokenIdCounter,
-            productAge
+            productAge,
+            monthlyRevenue,
+            monthlyExpenses,
+            monthlyTraffic,
+            location,
+            productLink
+
         );
         _safeMint(msg.sender, tokenIdCounter);
         _setTokenURI(tokenIdCounter, _digiURI);
@@ -70,7 +83,8 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
             _description,
             _digiURI,
             0,
-            tokenIdCounter
+            tokenIdCounter,
+            productLink
         );
         return tokenIdCounter;
     }
@@ -96,7 +110,7 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
     }
 
     function setNftValue(uint256 nftWorth, uint256 _tokenId) public {
-        tokenIdToNft[_tokenId].worth = nftWorth;
+        tokenIdToNft[_tokenId]._worth = nftWorth;
     }
 
     function safeTransfer( address from,
@@ -107,9 +121,9 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
         _safeTransfer(from, to, tokenId, "");
     }
 
-    function updateAccessControlContract(address _accessController) public onlyAuthorized{
+    function updateAccessControlContract(RealIncomAccessControl _accessController) public onlyAuthorized{
         accessController = RealIncomAccessControl(_accessController);
-        emit AccessControlContractUpdated(_accessController, msg.sender);
+        emit AccessControlContractUpdated(address(_accessController), msg.sender);
 
     }
 

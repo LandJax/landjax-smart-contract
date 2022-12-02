@@ -56,8 +56,8 @@ contract VillageSquare is Escrow, AuctionInterface {
     uint256 disputeCount;
 
     constructor(
-        address _auctionContractAddreas,
-        address _accessControllerAddress
+        RealIncomAuction _auctionContractAddreas,
+        RealIncomAccessControl _accessControllerAddress
     ) {
         auctionContract = RealIncomAuction(_auctionContractAddreas);
         accessController = RealIncomAccessControl(_accessControllerAddress);
@@ -124,19 +124,19 @@ contract VillageSquare is Escrow, AuctionInterface {
         );
     }
 
-    function updateAuctionContract(address _auctionContract)
+    function updateAuctionContract(RealIncomAuction _auctionContract)
         public
         onlyAuthorized
     {
         auctionContract = RealIncomAuction(_auctionContract);
-        emit AuctionContractUpdated(_auctionContract, msg.sender);
+        emit AuctionContractUpdated(address(_auctionContract), msg.sender);
     }
 
-    function updateAccessControlContract(address _accessController)
+    function updateAccessControlContract(RealIncomAccessControl _accessController)
         public
         onlyAuthorized
     {
         accessController = RealIncomAccessControl(_accessController);
-        emit AccessControlContractUpdated(_accessController, msg.sender);
+        emit AccessControlContractUpdated(address(_accessController), msg.sender);
     }
 }

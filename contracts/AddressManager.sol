@@ -28,12 +28,12 @@ contract AddressManager{
     RealIncomAuction   private    _auctionContract;
     VillageSquare    private      _villageSquareContract;
 
-    constructor(address _accessControlAddress, address _auctionAddress, address _nftAddress, address _villageSquareAddress){
-        accessControlAddress = _accessControlAddress;
-        auctionAddress = _auctionAddress;
-        nftAddress = _nftAddress;
+    constructor(RealIncomAccessControl _accessControlAddress, RealIncomAuction _auctionAddress, RealIncomNft _nftAddress, VillageSquare _villageSquareAddress){
+        accessControlAddress =  address(_accessControlAddress);
+        auctionAddress = address(_auctionAddress);
+        nftAddress =  address(_nftAddress);
         addressManagerAddress = address(this);
-        villageSquareAddress = _villageSquareAddress;
+        villageSquareAddress = address(_villageSquareAddress);
         _accessController = RealIncomAccessControl(_accessControlAddress);
         _nftContract = RealIncomNft(_nftAddress);
         _auctionContract = RealIncomAuction(_auctionAddress);
@@ -46,20 +46,20 @@ contract AddressManager{
         _;
     }
 
-    function updateAccessControlAddress(address _accessControlAddress) public onlyAuthorized{
-        accessControlAddress = _accessControlAddress;
+    function updateAccessControlAddress(RealIncomAccessControl _accessControlAddress) public onlyAuthorized{
+        accessControlAddress = address(_accessControlAddress);
         _accessController = RealIncomAccessControl(_accessControlAddress);
         _nftContract.updateAccessControlContract(_accessControlAddress);
         _villageSquareContract.updateAccessControlContract(_accessControlAddress);
         _auctionContract.updateAccessControlContract(_accessControlAddress);
-        emit AccessControlAddressUpdated(_accessControlAddress, msg.sender);
+        emit AccessControlAddressUpdated(address(_accessControlAddress), msg.sender);
     }
 
-    function updateAuctionAddress(address _auctionAddress) public onlyAuthorized{
-        auctionAddress = _auctionAddress;
+    function updateAuctionAddress(RealIncomAuction _auctionAddress) public onlyAuthorized{
+        auctionAddress = address(_auctionAddress);
         _auctionContract = RealIncomAuction(_auctionAddress);
         _villageSquareContract.updateAuctionContract(_auctionAddress);
-        emit AuctionAddressUpdated(_auctionAddress, msg.sender);
+        emit AuctionAddressUpdated(address(_auctionAddress), msg.sender);
     }
 
     function updateNftAddress(address _nftAddress) public onlyAuthorized{

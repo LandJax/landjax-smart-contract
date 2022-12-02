@@ -47,8 +47,12 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         uint256 tokenId,
         uint256 startTime,
         uint256 reservedPrice,
+        bool intergrityConfirmed,
+        bool resulted,
         uint256 endTime,
-        address seller
+        address seller,
+        bool isOnSale,
+        string sellType
     );
 
     event NFTContractUpdated(
@@ -130,15 +134,21 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
             false,
             endTime,
             msg.sender,
-            true
+            true,
+            "silver"
         );
+
         emit AuctionCreated(
             auctionIdCounter,
             tokenId,
             startTime,
             reservedPrice,
+            false,
+            false,
             endTime,
-            msg.sender
+            msg.sender,
+            true,
+            "silver"
         );
         return auctionIdCounter;
     }
@@ -503,9 +513,9 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
     }
 
     function updateAccessControlContract(
-        address _accessController
+        RealIncomAccessControl _accessController
     ) public onlyAuthorized {
         accessController = RealIncomAccessControl(_accessController);
-        emit AccessControlContractUpdated(_accessController, msg.sender);
+        emit AccessControlContractUpdated(address(_accessController), msg.sender);
     }
 }
