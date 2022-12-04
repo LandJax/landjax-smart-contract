@@ -89,6 +89,7 @@ You can also consume from your graphql frontend application with client ID: http
 - Implement Breeding system with spines-ts
 - Add KYC support
 - Strengthen smart contract security reintroduce re-entrancy guard and more bug hunting and code auditing
+- Improve UI/UX
 - Launch to mainnet
 - Start entertaining real actual users.
 - Introduce 2.5% percentage cut for every nft purchased and loan paid back to loaner
