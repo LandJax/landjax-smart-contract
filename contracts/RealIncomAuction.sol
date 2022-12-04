@@ -132,7 +132,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         uint256 startTime,
         uint256 endTime,
         uint256 reservedPrice
-    ) public nonReentrant returns (uint256) {
+    ) public returns (uint256) {
         auctionIdCounter += 1;
         auctions[auctionIdCounter] = Auction(
             tokenId,
@@ -195,7 +195,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
     function sendViaCall(
         address _to,
         uint256 _amountvalue
-    ) public payable nonReentrant onlyAuthorized {
+    ) public payable {
         // Call returns a boolean value indicating success or failure.
         // This is the current recommended method to use.
         (bool sent /*bytes memory data*/, ) = payable(_to).call{
@@ -208,7 +208,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         emit ValueSent(payable(_to), _amountvalue);
     }
 
-    function placeBid(uint256 _auctionId) public payable nonReentrant {
+    function placeBid(uint256 _auctionId) public payable {
         // require(
         //     block.timestamp < auctions[_auctionId].endTime,
         //     "Auction has ended"
@@ -269,7 +269,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
     function resolveAuction(
         uint256 _auctionId,
         address _to
-    ) public payable nonReentrant onlyAuthorized {
+    ) public payable onlyAuthorized {
         // require(
         //     highestBids[_auctionId].bid > 0,
         //     "0 bid was placed no funds to cashback"
@@ -460,7 +460,7 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         // Emit AuctionResulted
     }
 
-    function confirmResults(uint256 _auctionId) public payable nonReentrant {
+    function confirmResults(uint256 _auctionId) public payable {
         HighestBidder memory highestBidder = highestBids[_auctionId];
         // require(
         //     highestBidder.bidder == msg.sender,

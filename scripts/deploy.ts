@@ -37,6 +37,18 @@ async function main() {
 
     await verify(realIncomAuctionContract.address, [realIncomNftContract.address, realIncomAccessControlContract.address])
   }
+
+
+  // const realIncomAuctionFactory = await ethers.getContractFactory("RealIncomAuction");
+  // const realIncomAuctionContract = await realIncomAuctionFactory.deploy("0xd54765ccB13FDeb047276E2F85AF75B99680Ba23", "0x93353507af4eD824E95D0fe57BeA183f7C218e59");
+  // await realIncomAuctionContract.deployed();
+  // console.log("Contract Deployed to... Auction", realIncomAuctionContract.address)
+  // if (!isLocalNetwork) {
+  //   await realIncomAuctionContract.deployTransaction.wait(6)
+
+  //   await verify(realIncomAuctionContract.address, ["0xd54765ccB13FDeb047276E2F85AF75B99680Ba23", "0x93353507af4eD824E95D0fe57BeA183f7C218e59"])
+  // }
+
   const villageSquareFactory = await ethers.getContractFactory("VillageSquare");
   const villageSquareContract = await villageSquareFactory.deploy(realIncomAuctionContract.address, realIncomAccessControlContract.address);
   await villageSquareContract.deployed();
@@ -76,7 +88,7 @@ async function main() {
   let newAddressManagerAddress = await realIncomAccessControlContract.addressManager()
   console.log("Address updated to ...", newAddressManagerAddress)
 
-  fs.writeFileSync("addressesLocal.json", JSON.stringify({
+  fs.writeFileSync("addresses.json", JSON.stringify({
     "Access Controls": realIncomAccessControlContract.address,
     "NFT": realIncomNftContract.address,
     "Auction": realIncomAuctionContract.address,

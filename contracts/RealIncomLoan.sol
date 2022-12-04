@@ -106,7 +106,7 @@ contract RealIncomLoan is ReentrancyGuard {
     }
 
     // create a list of lenders
-    mapping(uint256 => Loan) loans;
+    mapping(uint256 => Loan) public loans;
 
     // define a struct for borrowers amountBorrowed, interestRate, loanDuration, monthlyRemittance
     struct Borrower {
@@ -121,7 +121,7 @@ contract RealIncomLoan is ReentrancyGuard {
         uint256 collateralTokenId;
     }
     // create a list of borrowers
-    mapping(uint256 => Borrower) borrowers;
+    mapping(uint256 => Borrower) public borrowers;
 
     // create Loan
     function createLoan(
