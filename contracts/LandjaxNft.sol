@@ -2,16 +2,16 @@
 
 pragma solidity ^0.8.7;
 
-import "./RealIncomAccessControl.sol";
+import "./LandjaxAccessControl.sol";
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
+contract landjaxNft is ERC721URIStorage, ReentrancyGuard {
     uint256 tokenIdCounter;
     string private NftBaseURI;
-    RealIncomAccessControl accessController;
+    landjaxAccessControl accessController;
 
     event NftMinted(
         address owner,
@@ -28,7 +28,10 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
         string productLink
     );
 
-    event  AccessControlContractUpdated(address indexed accessController, address indexed innitiator);
+    event AccessControlContractUpdated(
+        address indexed accessController,
+        address indexed innitiator
+    );
     struct DigiAsset {
         address _owner;
         string _title;
@@ -47,7 +50,7 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
 
     constructor(address _accessController) ERC721("Real Income", "INCOM") {
         tokenIdCounter = 0;
-        accessController = RealIncomAccessControl(_accessController);
+        accessController = landjaxAccessControl(_accessController);
     }
 
     function mintNFT(
@@ -60,9 +63,6 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
         uint256 monthlyTraffic,
         string memory location,
         string memory productLink
-
-
-        
     ) public returns (uint256) {
         tokenIdCounter += 1;
         tokenIdToNft[tokenIdCounter] = DigiAsset(
@@ -78,12 +78,11 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
             monthlyTraffic,
             location,
             productLink
-
         );
         _safeMint(msg.sender, tokenIdCounter);
         _setTokenURI(tokenIdCounter, _digiURI);
         emit NftMinted(
-           msg.sender,
+            msg.sender,
             _title,
             _description,
             _digiURI,
@@ -123,27 +122,41 @@ contract RealIncomNft is ERC721URIStorage, ReentrancyGuard {
         tokenIdToNft[_tokenId]._worth = nftWorth;
     }
 
-    function fetchNftValue(uint256 _tokenId) public view returns(uint256) {
+    function fetchNftValue(uint256 _tokenId) public view returns (uint256) {
         return tokenIdToNft[_tokenId]._worth;
     }
 
-    function seeNft(uint256 _tokenId) public view returns(string memory, string memory, string memory){
-        return (tokenIdToNft[_tokenId]._title, tokenIdToNft[_tokenId]._description, tokenIdToNft[_tokenId]._productLink);
+    function seeNft(
+        uint256 _tokenId
+    ) public view returns (string memory, string memory, string memory) {
+        return (
+            tokenIdToNft[_tokenId]._title,
+            tokenIdToNft[_tokenId]._description,
+            tokenIdToNft[_tokenId]._productLink
+        );
     }
 
-    function safeTransfer( address from,
-        address to,
-        uint256 tokenId) public nonReentrant{
-         require(isApprovedForAll(msg.sender, address(this)), "ERC721: caller is not token owner or approved");
-         tokenIdToNft[tokenId]._owner = msg.sender;
-        _safeTransfer(from, to, tokenId, "");
+    // function safeTransfer(
+    //     address from,
+    //     address to,
+    //     uint256 tokenId
+    // ) public nonReentrant {
+    //     require(
+    //         _isApprovedOrOwner(_msgSender(), tokenId),
+    //         "ERC721: caller is not token owner or approved"
+    //     );
+
+    //     tokenIdToNft[tokenId]._owner = msg.sender;
+    //     _safeTransfer(from, to, tokenId, "");
+    // }
+
+    function updateAccessControlContract(
+        landjaxAccessControl _accessController
+    ) public onlyAuthorized {
+        accessController = landjaxAccessControl(_accessController);
+        emit AccessControlContractUpdated(
+            address(_accessController),
+            msg.sender
+        );
     }
-
-    function updateAccessControlContract(RealIncomAccessControl _accessController) public onlyAuthorized{
-        accessController = RealIncomAccessControl(_accessController);
-        emit AccessControlContractUpdated(address(_accessController), msg.sender);
-
-    }
-
-    
 }

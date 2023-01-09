@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 
 import "./AddressManager.sol";
 
-contract RealIncomAccessControl{
+contract LandjaxAccessControl{
     mapping(address => bool) private admins;
     address private _owner;
     AddressManager public addressManager;
@@ -48,7 +48,7 @@ contract RealIncomAccessControl{
 }
 
 //  function updateNftContract(address _nftContract) public onlyAuthorised{
-//          realIncomNftContract = RealIncomNft(_nftContract);
+//          LandjaxNftContract = LandjaxNft(_nftContract);
 //     }
 
 //     function updateVillageSquare(address _villageSquareContract) public onlyAuthorised{

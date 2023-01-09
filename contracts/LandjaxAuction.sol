@@ -2,20 +2,20 @@
 
 pragma solidity ^0.8.7;
 
-import "./RealIncomNft.sol";
+import "./LandjaxNft.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./RealIncomAccessControl.sol";
+import "./LandjaxAccessControl.sol";
 import "./VillageSquare.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract RealIncomAuction is Ownable, ReentrancyGuard {
+contract LandjaxAuction is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
 
-    RealIncomAccessControl accessController;
+    landjaxAccessControl accessController;
 
-    RealIncomNft nftContract;
+    landjaxNft nftContract;
     VillageSquare villageSquareContract;
     uint256 minimumBidIncrement = 1e18;
     struct Auction {
@@ -121,8 +121,8 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
     }
 
     constructor(address _incomNft, address _accessController) {
-        nftContract = RealIncomNft(_incomNft);
-        accessController = RealIncomAccessControl(_accessController);
+        nftContract = landjaxNft(_incomNft);
+        accessController = landjaxAccessControl(_accessController);
         auctionIdCounter = 0;
     }
 
@@ -438,8 +438,8 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
         //     "Operator or contract not approved"
         // );
         HighestBidder memory highestBidder = highestBids[_auctionId];
-        nftContract.safeTransfer(
-            msg.sender,
+        nftContract.safeTransferFrom(
+            nftContract.ownerOf(auctions[_auctionId].tokenId),
             highestBidder.bidder,
             auctions[_auctionId].tokenId
         );
@@ -526,14 +526,14 @@ contract RealIncomAuction is Ownable, ReentrancyGuard {
     }
 
     function updateNftContract(address _nftContract) public onlyAuthorized {
-        nftContract = RealIncomNft(_nftContract);
+        nftContract = landjaxNft(_nftContract);
         emit NFTContractUpdated(_nftContract, msg.sender);
     }
 
     function updateAccessControlContract(
-        RealIncomAccessControl _accessController
+        landjaxAccessControl _accessController
     ) public onlyAuthorized {
-        accessController = RealIncomAccessControl(_accessController);
+        accessController = landjaxAccessControl(_accessController);
         emit AccessControlContractUpdated(address(_accessController), msg.sender);
     }
 }

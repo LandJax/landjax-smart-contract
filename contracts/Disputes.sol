@@ -3,8 +3,8 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/utils/escrow/Escrow.sol";
-import "./RealIncomAuction.sol";
-import "./RealIncomAccessControl.sol";
+import "./LandjaxAuction.sol";
+import "./LandjaxAccessControl.sol";
 
 interface AuctionInterface {
     struct Auction {
@@ -30,10 +30,10 @@ interface AuctionInterface {
  * the funds is now transferred to appropriate user after dispute settlement
  */
 
-contract VillageSquare is Escrow, AuctionInterface {
+contract Disputes is Escrow, AuctionInterface {
     address agentOperator;
-    RealIncomAuction public auctionContract;
-    RealIncomAccessControl public accessController;
+    landjaxAuction public auctionContract;
+    landjaxAccessControl public accessController;
 
     event DisputeResolved(
         address _fundReceiver,
@@ -69,11 +69,11 @@ contract VillageSquare is Escrow, AuctionInterface {
     uint256 disputeCount;
 
     constructor(
-        RealIncomAuction _auctionContractAddreas,
-        RealIncomAccessControl _accessControllerAddress
+        landjaxAuction _auctionContractAddreas,
+        landjaxAccessControl _accessControllerAddress
     ) {
-        auctionContract = RealIncomAuction(_auctionContractAddreas);
-        accessController = RealIncomAccessControl(_accessControllerAddress);
+        auctionContract = landjaxAuction(_auctionContractAddreas);
+        accessController = landjaxAccessControl(_accessControllerAddress);
         disputeCount = 0;
     }
 
@@ -139,19 +139,19 @@ contract VillageSquare is Escrow, AuctionInterface {
         );
     }
 
-    function updateAuctionContract(RealIncomAuction _auctionContract)
+    function updateAuctionContract(landjaxAuction _auctionContract)
         public
         onlyAuthorized
     {
-        auctionContract = RealIncomAuction(_auctionContract);
+        auctionContract = landjaxAuction(_auctionContract);
         emit AuctionContractUpdated(address(_auctionContract), msg.sender);
     }
 
-    function updateAccessControlContract(RealIncomAccessControl _accessController)
+    function updateAccessControlContract(landjaxAccessControl _accessController)
         public
         onlyAuthorized
     {
-        accessController = RealIncomAccessControl(_accessController);
+        accessController = landjaxAccessControl(_accessController);
         emit AccessControlContractUpdated(address(_accessController), msg.sender);
     }
 }

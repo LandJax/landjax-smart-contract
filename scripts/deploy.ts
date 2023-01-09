@@ -6,105 +6,119 @@ import fs from 'fs';
 
 async function main() {
   let isLocalNetwork: boolean = network.config.chainId == 31337
-  const realIncomAccessControlFactory = await ethers.getContractFactory("RealIncomAccessControl");
-  const realIncomAccessControlContract = await realIncomAccessControlFactory.deploy();
-  await realIncomAccessControlContract.deployed();
-  console.log("Contract Deployed to... Access Controls", realIncomAccessControlContract.address)
+  const landjaxAccessControlFactory = await ethers.getContractFactory("LandjaxAccessControl");
+  const landjaxAccessControlContract = await landjaxAccessControlFactory.deploy();
+  await landjaxAccessControlContract.deployed();
+  console.log("Contract Deployed to... Access Controls", landjaxAccessControlContract.address)
   if (!isLocalNetwork) {
-    await realIncomAccessControlContract.deployTransaction.wait(6)
+    await landjaxAccessControlContract.deployTransaction.wait(6)
 
-    await verify(realIncomAccessControlContract.address, [])
+    await verify(landjaxAccessControlContract.address, [])
   }
 
 
 
-  const realIncomNftFactory = await ethers.getContractFactory("RealIncomNft");
-  const realIncomNftContract = await realIncomNftFactory.deploy(realIncomAccessControlContract.address);
-  await realIncomNftContract.deployed();
-  console.log("Contract Deployed to... NFT", realIncomNftContract.address)
+  const landjaxNftFactory = await ethers.getContractFactory("LandjaxNft");
+  const landjaxNftContract = await landjaxNftFactory.deploy(landjaxAccessControlContract.address);
+  await landjaxNftContract.deployed();
+  console.log("Contract Deployed to... NFT", landjaxNftContract.address)
   if (!isLocalNetwork) {
-    await realIncomNftContract.deployTransaction.wait(6)
+    await landjaxNftContract.deployTransaction.wait(6)
 
-    await verify(realIncomNftContract.address, [realIncomAccessControlContract.address])
+    await verify(landjaxNftContract.address, [landjaxAccessControlContract.address])
   }
 
-  const realIncomAuctionFactory = await ethers.getContractFactory("RealIncomAuction");
-  const realIncomAuctionContract = await realIncomAuctionFactory.deploy(realIncomNftContract.address, realIncomAccessControlContract.address);
-  await realIncomAuctionContract.deployed();
-  console.log("Contract Deployed to... Auction", realIncomAuctionContract.address)
+  const landjaxAuctionFactory = await ethers.getContractFactory("LandjaxAuction");
+  const landjaxAuctionContract = await landjaxAuctionFactory.deploy(landjaxNftContract.address, landjaxAccessControlContract.address);
+  await landjaxAuctionContract.deployed();
+  console.log("Contract Deployed to... Auction", landjaxAuctionContract.address)
   if (!isLocalNetwork) {
-    await realIncomAuctionContract.deployTransaction.wait(6)
+    await landjaxAuctionContract.deployTransaction.wait(6)
 
-    await verify(realIncomAuctionContract.address, [realIncomNftContract.address, realIncomAccessControlContract.address])
+    await verify(landjaxAuctionContract.address, [landjaxNftContract.address, landjaxAccessControlContract.address])
   }
 
+  // Single Begin
 
-  // const realIncomAuctionFactory = await ethers.getContractFactory("RealIncomAuction");
-  // const realIncomAuctionContract = await realIncomAuctionFactory.deploy("0xd54765ccB13FDeb047276E2F85AF75B99680Ba23", "0x93353507af4eD824E95D0fe57BeA183f7C218e59");
-  // await realIncomAuctionContract.deployed();
-  // console.log("Contract Deployed to... Auction", realIncomAuctionContract.address)
+  // const landjaxNftFactory = await ethers.getContractFactory("LandjaxNft");
+  // const landjaxNftContract = await landjaxNftFactory.deploy("0x93353507af4eD824E95D0fe57BeA183f7C218e59");
+  // await landjaxNftContract.deployed();
+  // console.log("Contract Deployed to... NFT", landjaxNftContract.address)
   // if (!isLocalNetwork) {
-  //   await realIncomAuctionContract.deployTransaction.wait(6)
+  //   await landjaxNftContract.deployTransaction.wait(6)
 
-  //   await verify(realIncomAuctionContract.address, ["0xd54765ccB13FDeb047276E2F85AF75B99680Ba23", "0x93353507af4eD824E95D0fe57BeA183f7C218e59"])
+  //   await verify(landjaxNftContract.address, ["0x93353507af4eD824E95D0fe57BeA183f7C218e59"])
   // }
 
+
+  // const landjaxAuctionFactory = await ethers.getContractFactory("LandjaxAuction");
+  // const landjaxAuctionContract = await landjaxAuctionFactory.deploy(landjaxNftContract.address, "0x93353507af4eD824E95D0fe57BeA183f7C218e59");
+  // await landjaxAuctionContract.deployed();
+  // console.log("Contract Deployed to... Auction", landjaxAuctionContract.address)
+  // if (!isLocalNetwork) {
+  //   await landjaxAuctionContract.deployTransaction.wait(6)
+
+  //   await verify(landjaxAuctionContract.address, [landjaxNftContract.address, "0x93353507af4eD824E95D0fe57BeA183f7C218e59"])
+  // }
+
+  // single end
+
   const villageSquareFactory = await ethers.getContractFactory("VillageSquare");
-  const villageSquareContract = await villageSquareFactory.deploy(realIncomAuctionContract.address, realIncomAccessControlContract.address);
+  const villageSquareContract = await villageSquareFactory.deploy(landjaxAuctionContract.address, landjaxAccessControlContract.address);
   await villageSquareContract.deployed();
   console.log("Contract Deployed to... Village Square", villageSquareContract.address)
   if (!isLocalNetwork) {
     await villageSquareContract.deployTransaction.wait(6)
 
-    await verify(villageSquareContract.address, [realIncomAuctionContract.address, realIncomAccessControlContract.address])
+    await verify(villageSquareContract.address, [landjaxAuctionContract.address, landjaxAccessControlContract.address])
   }
 
-  const RealIncomLoanFactory = await ethers.getContractFactory("RealIncomLoan");
-  const RealIncomLoanContract = await RealIncomLoanFactory.deploy(realIncomNftContract.address, realIncomAccessControlContract.address);
-  await RealIncomLoanContract.deployed();
-  console.log("Contract Deployed to... Real Incom Loan", RealIncomLoanContract.address)
+  const landjaxLoanFactory = await ethers.getContractFactory("LandjaxLoan");
+  const landjaxLoanContract = await landjaxLoanFactory.deploy(landjaxNftContract.address, landjaxAccessControlContract.address);
+  await landjaxLoanContract.deployed();
+  console.log("Contract Deployed to... Real Incom Loan", landjaxLoanContract.address)
   if (!isLocalNetwork) {
-    await RealIncomLoanContract.deployTransaction.wait(6)
+    await landjaxLoanContract.deployTransaction.wait(6)
 
-    await verify(RealIncomLoanContract.address, [realIncomNftContract.address, realIncomAccessControlContract.address])
+    await verify(landjaxLoanContract.address, [landjaxNftContract.address, landjaxAccessControlContract.address])
   }
 
   const addressManagerFactory = await ethers.getContractFactory("AddressManager");
-  const addressManagerContract = await addressManagerFactory.deploy(realIncomAccessControlContract.address, realIncomAuctionContract.address, realIncomNftContract.address, villageSquareContract.address, RealIncomLoanContract.address);
+  const addressManagerContract = await addressManagerFactory.deploy(landjaxAccessControlContract.address, landjaxAuctionContract.address, landjaxNftContract.address, villageSquareContract.address, landjaxLoanContract.address);
   await addressManagerContract.deployed();
   console.log("Contract Deployed to... Address Manager", addressManagerContract.address)
   if (!isLocalNetwork) {
     await addressManagerContract.deployTransaction.wait(6)
 
-    await verify(addressManagerContract.address, [realIncomAccessControlContract.address, realIncomAuctionContract.address, realIncomNftContract.address, villageSquareContract.address, RealIncomLoanContract.address])
+    await verify(addressManagerContract.address, [landjaxAccessControlContract.address, landjaxAuctionContract.address, landjaxNftContract.address, villageSquareContract.address, landjaxLoanContract.address])
   }
 
 
  
 
-  let addressChangeTxn = await realIncomAccessControlContract.updateAddressManager(addressManagerContract.address)
+  let addressChangeTxn = await landjaxAccessControlContract.updateAddressManager(addressManagerContract.address)
   console.log("updating address manager on access control contract...")
   await addressChangeTxn.wait(1)
-  let newAddressManagerAddress = await realIncomAccessControlContract.addressManager()
+  let newAddressManagerAddress = await landjaxAccessControlContract.addressManager()
   console.log("Address updated to ...", newAddressManagerAddress)
 
   fs.writeFileSync("addresses.json", JSON.stringify({
-    "Access Controls": realIncomAccessControlContract.address,
-    "NFT": realIncomNftContract.address,
-    "Auction": realIncomAuctionContract.address,
+    "Access Controls": landjaxAccessControlContract.address,
+    "NFT": landjaxNftContract.address,
+    "Auction": landjaxAuctionContract.address,
     "Village Square": villageSquareContract.address,
     "Address Manager": addressManagerContract.address,
-    "Loan": RealIncomLoanContract.address
+    "Loan": landjaxLoanContract.address
 
   }))
 
   console.log({
-    "Access Controls": realIncomAccessControlContract.address,
-    "NFT": realIncomNftContract.address,
-    "Auction": realIncomAuctionContract.address,
-    "Village Square": villageSquareContract.address,
-    "Address Manager": addressManagerContract.address,
-    "Loan": RealIncomLoanContract.address
+    // "Access Controls": landjaxAccessControlContract.address,
+    "NFT": landjaxNftContract.address,
+    "Auction": landjaxAuctionContract.address,
+    // "Village Square": villageSquareContract.address,
+    // "Address Manager": addressManagerContract.address,
+    // "Loan": landjaxLoanContract.address
 
 
   })

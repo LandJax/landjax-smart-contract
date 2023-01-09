@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "./RealIncomAccessControl.sol";
-import "./RealIncomNft.sol";
-import "./RealIncomAuction.sol";
+import "./LandjaxAccessControl.sol";
+import "./LandjaxNft.sol";
+import "./LandjaxAuction.sol";
 import "./VillageSquare.sol";
-import "./RealIncomLoan.sol";
+import "./LandjaxLoan.sol";
 
 contract AddressManager {
     address public accessControlAddress;
@@ -27,18 +27,18 @@ contract AddressManager {
     );
     event LoanUpdated(address loanAddress, address innitiator);
 
-    RealIncomAccessControl private _accessController;
-    RealIncomNft private _nftContract;
-    RealIncomAuction private _auctionContract;
+    landjaxAccessControl private _accessController;
+    landjaxNft private _nftContract;
+    landjaxAuction private _auctionContract;
     VillageSquare private _villageSquareContract;
-    RealIncomLoan private _loanContract;
+    landjaxLoan private _loanContract;
 
     constructor(
-        RealIncomAccessControl _accessControlAddress,
-        RealIncomAuction _auctionAddress,
-        RealIncomNft _nftAddress,
+        landjaxAccessControl _accessControlAddress,
+        landjaxAuction _auctionAddress,
+        landjaxNft _nftAddress,
         VillageSquare _villageSquareAddress,
-        RealIncomLoan _loanAddress
+        landjaxLoan _loanAddress
     ) {
         accessControlAddress = address(_accessControlAddress);
         auctionAddress = address(_auctionAddress);
@@ -46,11 +46,11 @@ contract AddressManager {
         addressManagerAddress = address(this);
         loanAddress = address(_loanAddress);
         villageSquareAddress = address(_villageSquareAddress);
-        _accessController = RealIncomAccessControl(_accessControlAddress);
-        _nftContract = RealIncomNft(_nftAddress);
-        _auctionContract = RealIncomAuction(_auctionAddress);
+        _accessController = landjaxAccessControl(_accessControlAddress);
+        _nftContract = landjaxNft(_nftAddress);
+        _auctionContract = landjaxAuction(_auctionAddress);
         _villageSquareContract = VillageSquare(_villageSquareAddress);
-        _loanContract = RealIncomLoan(_loanAddress);
+        _loanContract = landjaxLoan(_loanAddress);
     }
 
     modifier onlyAuthorized() {
@@ -62,10 +62,10 @@ contract AddressManager {
     }
 
     function updateAccessControlAddress(
-        RealIncomAccessControl _accessControlAddress
+        landjaxAccessControl _accessControlAddress
     ) public onlyAuthorized {
         accessControlAddress = address(_accessControlAddress);
-        _accessController = RealIncomAccessControl(_accessControlAddress);
+        _accessController = landjaxAccessControl(_accessControlAddress);
         _nftContract.updateAccessControlContract(_accessControlAddress);
         _villageSquareContract.updateAccessControlContract(
             _accessControlAddress
@@ -78,17 +78,17 @@ contract AddressManager {
     }
 
     function updateAuctionAddress(
-        RealIncomAuction _auctionAddress
+        landjaxAuction _auctionAddress
     ) public onlyAuthorized {
         auctionAddress = address(_auctionAddress);
-        _auctionContract = RealIncomAuction(_auctionAddress);
+        _auctionContract = landjaxAuction(_auctionAddress);
         _villageSquareContract.updateAuctionContract(_auctionAddress);
         emit AuctionAddressUpdated(address(_auctionAddress), msg.sender);
     }
 
     function updateNftAddress(address _nftAddress) public onlyAuthorized {
         nftAddress = _nftAddress;
-        _nftContract = RealIncomNft(_nftAddress);
+        _nftContract = landjaxNft(_nftAddress);
         emit NftAddressUpdated(_nftAddress, msg.sender);
     }
 
@@ -100,9 +100,9 @@ contract AddressManager {
         emit VillageSquareUpdated(_villageSquareAddress, msg.sender);
     }
 
-    function updateLoanAddress(RealIncomLoan _loanAddress) public onlyAuthorized {
+    function updateLoanAddress(landjaxLoan _loanAddress) public onlyAuthorized {
         loanAddress = address(_loanAddress);
-        _loanContract = RealIncomLoan(_loanAddress);
+        _loanContract = landjaxLoan(_loanAddress);
         emit LoanUpdated(address(_loanAddress), msg.sender);
     }
 }
